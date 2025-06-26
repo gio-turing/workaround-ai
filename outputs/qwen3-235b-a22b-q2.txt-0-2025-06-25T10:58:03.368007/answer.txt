@@ -1,0 +1,13 @@
+import socket
+import struct
+import datetime
+
+def get_time(server_uri):
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.settimeout(5)
+        sock.sendto(b'\x1b' + b'\x00' * 47, (server_uri, 123))
+        data, _ = sock.recvfrom(1024)
+    seconds, fractions = struct.unpack('!II', data[40:48])
+    unix_time = (seconds - 2208988800) + (fractions / (2**32))
+    dt = datetime.datetime.utcfromtimestamp(unix_time)
+    return dt.isoformat()

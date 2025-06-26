@@ -1,0 +1,18 @@
+import ntplib
+import datetime
+
+def get_time(server_uri):
+    # Parse the server URI to extract host and port
+    hostport = server_uri.split('//')[-1]
+    parts = hostport.split(':', 1)
+    host = parts[0]
+    port = int(parts[1]) if len(parts) > 1 else 123
+    
+    # Create NTP client and request time
+    client = ntplib.NTPClient()
+    response = client.request(host, port=port)
+    
+    # Convert the timestamp to UTC datetime and format as ISO string
+    timestamp = response.tx_time
+    dt = datetime.datetime.utcfromtimestamp(timestamp)
+    return dt.isoformat()

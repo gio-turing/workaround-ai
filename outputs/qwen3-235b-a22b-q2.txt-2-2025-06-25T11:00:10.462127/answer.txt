@@ -1,0 +1,8 @@
+import ntplib
+from datetime import datetime
+
+def get_time(server_uri):
+    client = ntplib.NTPClient()
+    response = client.request(server_uri)
+    dt = datetime.utcfromtimestamp(response.tx_time)
+    return dt.isoformat() + 'Z'

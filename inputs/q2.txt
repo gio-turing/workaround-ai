@@ -1,0 +1,1 @@
+Return a Python function get_time(server_uri) to request time for an NTP server at server_uri without authentication. The function should return a ISO datetime as string.
