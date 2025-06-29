@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 from fireworks import LLM
 from pydantic import BaseModel
 from threading import Thread, Semaphore
+from tqdm import tqdm
 
 load_dotenv()
 threads = []
@@ -33,9 +34,13 @@ def parse_response(response):
 
 def main(names, inputs, models):
     sem = Semaphore(value=int(os.getenv('CONCURRENCY')))
-    for model in models:
-        for i, question in enumerate(inputs):
-            for j in range(int(os.getenv('REPEAT_RUN'))):
+    dt = datetime.now().isoformat()
+    os.mkdir(f'outputs/{dt}')
+    for model in tqdm(models):
+        os.mkdir(f'outputs/{dt}/{model}')
+        for i, question in enumerate(tqdm(inputs)):
+            os.mkdir( f'outputs/{dt}/{model}/{names[i]}')
+            for j in tqdm(range(int(os.getenv('REPEAT_RUN')))):
                 def get(model, i, j, question):
                     with sem:
                         llm = LLM(model=model, deployment_type='auto',
@@ -52,11 +57,9 @@ def main(names, inputs, models):
                             max_tokens = 128000
                         ))
                         c = Response.model_validate(c)
-                        outdir = f'outputs/{model}-{names[i]}-{j}-{datetime.now().isoformat()}'
-                        os.mkdir(outdir)
-                        with open(f'{outdir}/answer.txt','w') as f:
+                        with open(f'outputs/{dt}/{model}/{names[i]}/answer-{j}.txt','w') as f:
                             f.write(c.code)
-                        with open(f'{outdir}/reason.txt','w') as f:
+                        with open(f'outputs/{dt}/{model}/{names[i]}/reason-{j}.txt','w') as f:
                             f.write(r)
                 threads.append(Thread(target=get, args=(model, i, j, question)))
                 threads[-1].start()
