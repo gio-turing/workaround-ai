@@ -11,4 +11,3 @@
     <li>Find the results at the 'outputs' directory.</li>
     <li>Enjoy the day!</li>
 </ol>
-* note that
